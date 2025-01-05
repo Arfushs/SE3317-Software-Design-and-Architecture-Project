@@ -19,6 +19,8 @@ public class TaskController {
         this.view = view;
         this.userBirthday = askUserBirthday();
 
+        model.registerObserver(view);
+
         // Başlangıçta görev listesini güncelle
         view.updateTaskList(model.getAllTasks());
 
@@ -117,10 +119,31 @@ public class TaskController {
             view.updateDay(currentDay);
             view.updateDate(currentDate);
             view.updateBirthdayMessage(birthdayMessage);
+            updateNotifications();
         });
 
         timer.start();
     }
+
+    private void updateNotifications() {
+        // Ana CompositeNotification
+        CompositeNotification compositeNotification = new CompositeNotification();
+
+        // Doğum günü mesajını ekle
+        Notification birthdayNotification = new BirthdayMessageDecorator(new SimpleNotification(""), userBirthday);
+        compositeNotification.addNotification(birthdayNotification);
+
+        // Görev bildirimlerini ekle
+        for (Task task : model.getAllTasks()) {
+            if (isDeadlineApproaching(task)) {
+                compositeNotification.addNotification(new SimpleNotification(task.getTaskName() + " için 1 gün kaldı."));
+            }
+        }
+
+        // UI'yi güncelle
+        view.updateNotifications(compositeNotification);
+    }
+
 
 
     private boolean isUserBirthday() {
@@ -155,7 +178,7 @@ public class TaskController {
             Task task = new Task(0, taskName, description, category, deadline);
             model.addTask(task);
             view.updateTaskList(model.getAllTasks());
-
+            updateNotifications();
 
         } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(null, "Hata: Geçerli bir tarih formatı girin (yyyy-mm-dd).", "Hata", JOptionPane.ERROR_MESSAGE);

@@ -1,7 +1,10 @@
 package view;
 
+import model.Notification;
 import model.Observer;
 import model.Task;
+import Main.Demo;
+import model.TaskModel;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -9,6 +12,7 @@ import java.awt.*;
 import java.util.List;
 
 public class TaskView extends JFrame implements Observer {
+    private TaskModel model;
     private JButton addButton, editButton, deleteButton;
     private JTable taskTable;
     private DefaultTableModel tableModel;
@@ -18,7 +22,8 @@ public class TaskView extends JFrame implements Observer {
     private JButton optionsButton;
 
 
-    public TaskView() {
+    public TaskView(TaskModel model) {
+        this.model = model;
         setTitle("Task Planner");
         setSize(700, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -91,16 +96,19 @@ public class TaskView extends JFrame implements Observer {
         birthdayMessageLabel.setText("Birthday Celebration Message: " + message);
     }
 
-    public void updateNotifications(List<String> notifications) {
+    public void updateNotifications(Notification compositeNotification) {
         notificationListModel.clear();
-        for (String notification : notifications) {
-            notificationListModel.addElement(notification);
+        String[] messages = compositeNotification.getMessage().split("\n");
+        for (String message : messages) {
+            notificationListModel.addElement(message);
         }
     }
 
+
     @Override
     public void update() {
-        System.out.println("Task list updated.");
+        System.out.println("Observer triggered: Task list is being updated.");
+        updateTaskList(model.getAllTasks());
     }
 
     public JButton getAddButton() {

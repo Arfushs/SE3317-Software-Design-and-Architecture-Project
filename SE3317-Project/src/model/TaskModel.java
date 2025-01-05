@@ -49,6 +49,8 @@ public class TaskModel implements  Subject {
             statement.setString(3, task.getCategory());
             statement.setDate(4, new java.sql.Date(task.getDeadline().getTime()));
             statement.executeUpdate();
+
+            notifyObservers();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -64,6 +66,8 @@ public class TaskModel implements  Subject {
             statement.setDate(4, new java.sql.Date(task.getDeadline().getTime()));
             statement.setInt(5, task.getId());
             statement.executeUpdate();
+
+            notifyObservers();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -75,6 +79,8 @@ public class TaskModel implements  Subject {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
             statement.executeUpdate();
+
+            notifyObservers();
         } catch (SQLException e) {
             e.printStackTrace();
         }

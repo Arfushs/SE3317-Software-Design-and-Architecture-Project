@@ -1,22 +1,17 @@
 package model;
 
-import java.util.List;
+public class NotificationDecorator implements Notification {
+    private final Notification baseNotification;
+    private final String additionalMessage;
 
-public class NotificationDecorator implements Message {
-    private final Message message;
-    private final List<String> notifications;
-
-    public NotificationDecorator(Message message, List<String> notifications) {
-        this.message = message;
-        this.notifications = notifications;
+    public NotificationDecorator(Notification baseNotification, String additionalMessage) {
+        this.baseNotification = baseNotification;
+        this.additionalMessage = additionalMessage;
     }
 
     @Override
     public String getMessage() {
-        String baseMessage = message.getMessage();
-        if (!notifications.isEmpty()) {
-            baseMessage += ", Notifications: " + String.join(", ", notifications);
-        }
-        return baseMessage;
+        // Temel bildirimin mesajını al ve ek mesajı ekle
+        return baseNotification.getMessage() + "\n" + additionalMessage;
     }
 }
