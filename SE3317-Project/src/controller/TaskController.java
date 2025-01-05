@@ -1,11 +1,6 @@
 package controller;
 
-import model.Message;
-import model.BasicMessage;
-import model.BirthdayMessageDecorator;
-import model.NotificationDecorator;
-import model.Task;
-import model.TaskModel;
+import model.*;
 import view.TaskView;
 
 import javax.swing.*;
@@ -56,6 +51,41 @@ public class TaskController {
         return birthday;
     }
 
+    private void addStrategyOptions() {
+        String[] options = {"Filter by Category", "Sort by Deadline"};
+        int choice = JOptionPane.showOptionDialog(
+                null,
+                "Select an action:",
+                "Task Options",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+
+        switch (choice) {
+            case 0 -> {
+                // Kategoriye göre filtreleme
+                String category = JOptionPane.showInputDialog("Enter category to filter:");
+                if (category != null && !category.trim().isEmpty()) {
+                    applyStrategy(new FilterByCategoryStrategy(category));
+                }
+            }
+            case 1 -> {
+                // Teslim tarihine göre sıralama
+                applyStrategy(new SortByDeadlineStrategy());
+            }
+        }
+    }
+
+
+    private void applyStrategy(TaskStrategy strategy) {
+        List<Task> updatedTasks = strategy.execute(model.getAllTasks());
+        view.updateTaskList(updatedTasks);
+    }
+
+
     private void addListeners() {
         // Görev ekleme
         view.getAddButton().addActionListener(e -> handleAddTask());
@@ -65,6 +95,9 @@ public class TaskController {
 
         // Görev düzenleme
         view.getEditButton().addActionListener(e -> handleEditTask());
+
+        // Strategy seçimi
+        view.getOptionsButton().addActionListener(e -> addStrategyOptions());
     }
 
     private void startTimer() {
@@ -79,22 +112,20 @@ public class TaskController {
                 birthdayMessage = "Happy Birthday!";
             }
 
-            // Bildirimler
-            List<String> notifications = new ArrayList<>();
-            for (Task task : model.getAllTasks()) {
-                if (isDeadlineApproaching(task)) {
-                    notifications.add(task.getTaskName() + " için 1 gün kaldı.");
-                }
-            }
 
             // UI'yi güncelle
             view.updateDay(currentDay);
             view.updateDate(currentDate);
             view.updateBirthdayMessage(birthdayMessage);
-            view.updateNotifications(notifications);
         });
 
         timer.start();
+    }
+
+
+    private boolean isUserBirthday() {
+        String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+        return currentDate.endsWith(userBirthday);
     }
 
     private boolean isDeadlineApproaching(Task task) {
@@ -124,6 +155,8 @@ public class TaskController {
             Task task = new Task(0, taskName, description, category, deadline);
             model.addTask(task);
             view.updateTaskList(model.getAllTasks());
+
+
         } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(null, "Hata: Geçerli bir tarih formatı girin (yyyy-mm-dd).", "Hata", JOptionPane.ERROR_MESSAGE);
         }
@@ -140,6 +173,8 @@ public class TaskController {
         int id = model.getAllTasks().get(selectedRow).getId();
         model.deleteTask(id);
         view.updateTaskList(model.getAllTasks());
+
+
     }
 
     private void handleEditTask() {
@@ -175,10 +210,14 @@ public class TaskController {
 
             model.updateTask(selectedTask);
             view.updateTaskList(model.getAllTasks());
+
+
         } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(null, "Hata: Geçerli bir tarih formatı girin (yyyy-mm-dd).", "Hata", JOptionPane.ERROR_MESSAGE);
         }
     }
+
+
 
     private boolean isNullOrEmpty(String str) {
         return str == null || str.trim().isEmpty();

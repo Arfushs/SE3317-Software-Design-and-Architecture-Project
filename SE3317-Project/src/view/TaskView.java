@@ -15,6 +15,8 @@ public class TaskView extends JFrame implements Observer {
     private JLabel dayLabel, dateLabel, birthdayMessageLabel;
     private JList<String> notificationList;
     private DefaultListModel<String> notificationListModel;
+    private JButton optionsButton;
+
 
     public TaskView() {
         setTitle("Task Planner");
@@ -58,6 +60,9 @@ public class TaskView extends JFrame implements Observer {
         mainPanel.add(topPanel, BorderLayout.NORTH);
         mainPanel.add(notificationPanel, BorderLayout.WEST);
         mainPanel.add(taskPanel, BorderLayout.CENTER);
+
+        optionsButton = new JButton("Options");
+        taskButtonPanel.add(optionsButton);
 
         add(mainPanel);
     }
@@ -112,5 +117,9 @@ public class TaskView extends JFrame implements Observer {
 
     public JTable getTaskTable() {
         return taskTable;
+    }
+
+    public JButton getOptionsButton() {
+        return optionsButton;
     }
 }
